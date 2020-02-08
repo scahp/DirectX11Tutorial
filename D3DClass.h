@@ -15,7 +15,7 @@ public:
 	void EndScene();
 
 	ID3D11Device* GetDevice() { return Device; }
-	ID3D11DeviceContext* GetDeviceContext() { DeviceContext; }
+	ID3D11DeviceContext* GetDeviceContext() { return DeviceContext; }
 
 	void GetProjectionMatrix(XMMATRIX& OutMatrix) { OutMatrix = ProjectionMatrix; }
 	void GetWorldMatrix(XMMATRIX& OutMatrix) { OutMatrix = WorldMatrix; }

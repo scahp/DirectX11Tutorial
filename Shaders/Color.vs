@@ -1,4 +1,3 @@
-ï»¿
 cbuffer MatrixBuffer
 {
 	matrix WorldMatrix;
@@ -8,7 +7,7 @@ cbuffer MatrixBuffer
 
 struct VertexInputType
 {
-	float4 Position : POSITION;
+	float3 Position : POSITION;
 	float4 Color : COLOR;
 };
 
@@ -22,15 +21,14 @@ PixelInputType ColorVertexShader(VertexInputType Input)
 {
 	PixelInputType Output;
 
-	// ì ì ˆí•œ í–‰ë ¬ ê³„ì‚°ì„ ìœ„í•´ ìœ„ì¹˜ ë²¡í„°ë¥¼ 4ë‹¨ìœ„ë¡œ ë³€ê²½
-	Input.Position.w = 1.0f;
+	float4 Pos = float4(Input.Position, 1.0f);
 
-	// ì›”ë“œ, ë·° ê·¸ë¦¬ê³  íˆ¬ì˜ í–‰ë ¬ì— ëŒ€í•œ ì •ì ì˜ ìœ„ì¹˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
-	Output.Position = mul(Input.Position, WorldMatrix);
+	// ¿ùµå, ºä ±×¸®°í Åõ¿µ Çà·Ä¿¡ ´ëÇÑ Á¤Á¡ÀÇ À§Ä¡¸¦ °è»êÇÕ´Ï´Ù.
+	Output.Position = mul(Pos, WorldMatrix);
 	Output.Position = mul(Output.Position, ViewMatrix);
 	Output.Position = mul(Output.Position, ProjectionMatrix);
 
-	// í”½ì…€ ì‰ì´ë”ê°€ ì‚¬ìš©í•  ì…ë ¥ ìƒ‰ìƒ
+	// ÇÈ¼¿ ½¦ÀÌ´õ°¡ »ç¿ëÇÒ ÀÔ·Â »ö»ó
 	Output.Color = Input.Color;
 
 	return Output;

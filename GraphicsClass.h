@@ -6,6 +6,9 @@ const float SCREEN_DEPTH_FAR = 1000.0f;
 const float SCREEN_DEPTH_NEAR = 0.1f;
 
 class D3DClass;
+class CameraClass;
+class ModelClass;
+class ColorShaderClass;
 
 class GraphicsClass
 {
@@ -23,4 +26,7 @@ private:
 
 private:
 	D3DClass* Direct3D = nullptr;
+	CameraClass* Camera = nullptr;
+	ModelClass* Model = nullptr;
+	ColorShaderClass* ColorShader = nullptr;
 };

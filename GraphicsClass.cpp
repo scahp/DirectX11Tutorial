@@ -1,6 +1,9 @@
 ﻿#include "stdafx.h"
 #include "GraphicsClass.h"
 #include "D3DClass.h"
+#include "CameraClass.h"
+#include "ModelClass.h"
+#include "ColorShaderClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -30,12 +33,72 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
+    Camera = new CameraClass();
+    if (!Camera)
+    {
+        DX_DELETE(Direct3D);
+        return false;
+    }
+
+    Camera->SetPosition(0.0f, 0.0f, -5.0f);
+
+    Model = new ModelClass();
+    if (!Model)
+    {
+        DX_DELETE(Direct3D);
+        DX_DELETE(Camera);
+        return false;
+    }
+
+    if (!Model->Initialize(Direct3D->GetDevice()))
+    {
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+        DX_DELETE(Model);
+        MessageBox(InHwnd, TEXT("Could not initialize the model object"), TEXT("Error"), MB_OK);
+        return false;
+    }
+
+    ColorShader = new ColorShaderClass();
+    if (!ColorShader)
+    {
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+		DX_DELETE(Model);
+        return false;
+    }
+
+
+    if (!ColorShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    {
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+		DX_DELETE(Model);
+        DX_DELETE(ColorShader);
+        MessageBox(InHwnd, TEXT("Could not initialize the color shader object"), TEXT("Error"), MB_OK);
+        return false;
+    }
+
     return true;
 }
 
 
 void GraphicsClass::Shutdown()
 {
+    if (ColorShader)
+    {
+        ColorShader->Shutdown();
+        DX_DELETE(ColorShader);
+    }
+
+    if (Model)
+    {
+        Model->Shutdown();
+        DX_DELETE(Model);
+    }
+
+    DX_DELETE(Camera);
+
     if (Direct3D)
     {
         Direct3D->Shutdown();
@@ -54,6 +117,16 @@ bool GraphicsClass::Frame()
 bool GraphicsClass::Render()
 {
     Direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
+
+    Camera->Render();
+
+    XMMATRIX WorldMatrix, ViewMatrix, ProjectionMatrix;
+    Direct3D->GetWorldMatrix(WorldMatrix);
+    Camera->GetViewMatrix(ViewMatrix);
+    Direct3D->GetProjectionMatrix(ProjectionMatrix);
+
+    Model->Bind(Direct3D->GetDeviceContext());
+    ColorShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix);
 
     Direct3D->EndScene();
     return true;

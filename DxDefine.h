@@ -14,3 +14,6 @@ using namespace DirectX;
 ///////////////////////////
 #include "AlignedAllocationPolicy.h"
 
+#define DX_RELEASE(x) { if (x) { x->Release(); x = nullptr; } }
+#define DX_DELETE(x) { if (x) { delete x; x = nullptr; } }
+#define DX_DELETE_ARRAY(x) { if (x) { delete[] x; x = nullptr; } }
