@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "ModelClass.h"
+#include "TextureClass.h"
 
 ModelClass::ModelClass()
 {
@@ -16,9 +17,12 @@ ModelClass::~ModelClass()
 
 }
 
-bool ModelClass::Initialize(ID3D11Device* InDevice)
+bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InTextureFilename)
 {
-	return InitializeBuffers(InDevice);
+	if (!InitializeBuffers(InDevice))
+		return false;
+
+	return LoadTexture(InDevice, InDeviceContext, InTextureFilename);
 }
 
 void ModelClass::Shutdown()
@@ -34,6 +38,11 @@ void ModelClass::Bind(ID3D11DeviceContext* InDeviceContext)
 int ModelClass::GetIndexCount()
 {
 	return IndexCount;
+}
+
+ID3D11ShaderResourceView* ModelClass::GetTexture() const
+{
+	return Texture->GetTexture();
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
@@ -54,13 +63,16 @@ bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
 
 	// 정점 배열에 데이터를 설정합니다.
 	Vertices[0].Position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  // Bottom left.
-	Vertices[0].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	//Vertices[0].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	Vertices[0].TexCoord = XMFLOAT2(0.0f, 1.0f);
 
 	Vertices[1].Position = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Top middle.
-	Vertices[1].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	//Vertices[1].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	Vertices[1].TexCoord = XMFLOAT2(0.5f, 0.0f);
 
 	Vertices[2].Position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	Vertices[2].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	//Vertices[2].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	Vertices[2].TexCoord = XMFLOAT2(1.0f, 1.0f);
 
 	Indices[0] = 0;
 	Indices[1] = 1;
@@ -129,4 +141,22 @@ void ModelClass::BindBuffers(ID3D11DeviceContext* InDeviceContext)
 	InDeviceContext->IASetVertexBuffers(0, 1, &VertexBuffer, &Stride, &Offset);
 	InDeviceContext->IASetIndexBuffer(IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	InDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+bool ModelClass::LoadTexture(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InFilename)
+{
+	Texture = new TextureClass();
+	if (!Texture)
+		return false;
+
+	return Texture->Initialize(InDevice, InDeviceContext, InFilename);
+}
+
+void ModelClass::ReleaseTexture()
+{
+	if (Texture)
+	{
+		Texture->Shutdown();
+		DX_DELETE(Texture);
+	}
 }

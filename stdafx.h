@@ -7,6 +7,7 @@
 // Windows 헤더 파일
 #include <Windows.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>

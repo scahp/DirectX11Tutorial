@@ -4,6 +4,7 @@
 #include "CameraClass.h"
 #include "ModelClass.h"
 #include "ColorShaderClass.h"
+#include "TextureShaderClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -50,7 +51,7 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
-    if (!Model->Initialize(Direct3D->GetDevice()))
+    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Textures/stone01.tga"))
     {
 		DX_DELETE(Direct3D);
 		DX_DELETE(Camera);
@@ -59,25 +60,45 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
-    ColorShader = new ColorShaderClass();
-    if (!ColorShader)
-    {
+  //  ColorShader = new ColorShaderClass();
+  //  if (!ColorShader)
+  //  {
+		//DX_DELETE(Direct3D);
+		//DX_DELETE(Camera);
+		//DX_DELETE(Model);
+  //      return false;
+  //  }
+
+
+  //  if (!ColorShader->Initialize(Direct3D->GetDevice(), InHwnd))
+  //  {
+		//DX_DELETE(Direct3D);
+		//DX_DELETE(Camera);
+		//DX_DELETE(Model);
+  //      DX_DELETE(ColorShader);
+  //      MessageBox(InHwnd, TEXT("Could not initialize the color shader object"), TEXT("Error"), MB_OK);
+  //      return false;
+  //  }
+
+	TextureShader = new TextureShaderClass();
+	if (!TextureShader)
+	{
 		DX_DELETE(Direct3D);
 		DX_DELETE(Camera);
 		DX_DELETE(Model);
-        return false;
-    }
+		return false;
+	}
 
 
-    if (!ColorShader->Initialize(Direct3D->GetDevice(), InHwnd))
-    {
+	if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
+	{
 		DX_DELETE(Direct3D);
 		DX_DELETE(Camera);
 		DX_DELETE(Model);
-        DX_DELETE(ColorShader);
-        MessageBox(InHwnd, TEXT("Could not initialize the color shader object"), TEXT("Error"), MB_OK);
-        return false;
-    }
+		DX_DELETE(TextureShader);
+		MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
+		return false;
+	}
 
     return true;
 }
@@ -85,11 +106,16 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
 
 void GraphicsClass::Shutdown()
 {
-    if (ColorShader)
-    {
-        ColorShader->Shutdown();
-        DX_DELETE(ColorShader);
-    }
+    //if (ColorShader)
+    //{
+    //    ColorShader->Shutdown();
+    //    DX_DELETE(ColorShader);
+    //}
+	if (TextureShader)
+	{
+        TextureShader->Shutdown();
+		DX_DELETE(TextureShader);
+	}
 
     if (Model)
     {
@@ -126,7 +152,8 @@ bool GraphicsClass::Render()
     Direct3D->GetProjectionMatrix(ProjectionMatrix);
 
     Model->Bind(Direct3D->GetDeviceContext());
-    ColorShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix);
+    //ColorShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix);
+    TextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTexture());
 
     Direct3D->EndScene();
     return true;
