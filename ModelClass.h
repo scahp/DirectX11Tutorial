@@ -15,6 +15,7 @@ private:
 	{
 		XMFLOAT3 Position;
 		XMFLOAT2 TexCoord;
+		XMFLOAT3 Normal;
 	};
 
 public:

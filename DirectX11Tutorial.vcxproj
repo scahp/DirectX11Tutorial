@@ -147,11 +147,14 @@
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="ColorShaderClass.h" />
     <ClInclude Include="D3DClass.h" />
+    <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DirectX11Tutorial.h" />
     <ClInclude Include="DxDefine.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GraphicsClass.h" />
     <ClInclude Include="InputClass.h" />
+    <ClInclude Include="LightClass.h" />
+    <ClInclude Include="LightShaderClass.h" />
     <ClInclude Include="ModelClass.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -164,9 +167,12 @@
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="ColorShaderClass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
+    <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DirectX11Tutorial.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
     <ClCompile Include="InputClass.cpp" />
+    <ClCompile Include="LightClass.cpp" />
+    <ClCompile Include="LightShaderClass.cpp" />
     <ClCompile Include="ModelClass.cpp" />
     <ClCompile Include="SystemClass.cpp" />
     <ClCompile Include="TextureClass.cpp" />
@@ -182,6 +188,8 @@
   <ItemGroup>
     <None Include="Shaders\Color.ps" />
     <None Include="Shaders\Color.vs" />
+    <None Include="Shaders\Light.ps" />
+    <None Include="Shaders\Light.vs" />
     <None Include="Shaders\Texture.ps" />
     <None Include="Shaders\Texture.vs" />
   </ItemGroup>

@@ -66,6 +66,15 @@
     <ClInclude Include="TextureClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="DDSTextureLoader.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LightShaderClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LightClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX11Tutorial.cpp">
@@ -98,6 +107,15 @@
     <ClCompile Include="TextureClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LightShaderClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LightClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DirectX11Tutorial.rc">
@@ -123,6 +141,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Texture.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Light.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Light.ps">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

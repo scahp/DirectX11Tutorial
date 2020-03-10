@@ -65,14 +65,17 @@ bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
 	Vertices[0].Position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  // Bottom left.
 	//Vertices[0].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	Vertices[0].TexCoord = XMFLOAT2(0.0f, 1.0f);
+	Vertices[0].Normal = XMFLOAT3(0.0f, 1.0f, -1.0f);
 
 	Vertices[1].Position = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Top middle.
 	//Vertices[1].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	Vertices[1].TexCoord = XMFLOAT2(0.5f, 0.0f);
+	Vertices[1].Normal = XMFLOAT3(0.0f, 1.0f, -1.0f);
 
 	Vertices[2].Position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
 	//Vertices[2].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 	Vertices[2].TexCoord = XMFLOAT2(1.0f, 1.0f);
+	Vertices[2].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	Indices[0] = 0;
 	Indices[1] = 1;

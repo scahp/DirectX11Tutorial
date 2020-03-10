@@ -5,6 +5,8 @@
 #include "ModelClass.h"
 #include "ColorShaderClass.h"
 #include "TextureShaderClass.h"
+#include "LightClass.h"
+#include "LightShaderClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -80,25 +82,41 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
   //      return false;
   //  }
 
-	TextureShader = new TextureShaderClass();
-	if (!TextureShader)
-	{
-		DX_DELETE(Direct3D);
-		DX_DELETE(Camera);
-		DX_DELETE(Model);
-		return false;
-	}
+	//TextureShader = new TextureShaderClass();
+	//if (!TextureShader)
+	//{
+	//	DX_DELETE(Direct3D);
+	//	DX_DELETE(Camera);
+	//	DX_DELETE(Model);
+	//	return false;
+	//}
 
+	//if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
+	//{
+	//	DX_DELETE(Direct3D);
+	//	DX_DELETE(Camera);
+	//	DX_DELETE(Model);
+	//	DX_DELETE(TextureShader);
+	//	MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
+	//	return false;
+	//}
 
-	if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
-	{
-		DX_DELETE(Direct3D);
-		DX_DELETE(Camera);
-		DX_DELETE(Model);
-		DX_DELETE(TextureShader);
-		MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
-		return false;
-	}
+    LightShader = new LightShaderClass();
+    if (!LightShader)
+        return false;
+
+    if (!LightShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    {
+        MessageBox(InHwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+        return false;
+    }
+
+    Light = new LightClass();
+    if (!Light)
+        return false;
+
+    Light->SetDiffuseColor(1.0f, 0.0f, 1.0f, 1.0f);
+    Light->SetDirection(0.0f, 0.0f, 1.0f);
 
     return true;
 }
@@ -111,11 +129,18 @@ void GraphicsClass::Shutdown()
     //    ColorShader->Shutdown();
     //    DX_DELETE(ColorShader);
     //}
-	if (TextureShader)
-	{
-        TextureShader->Shutdown();
-		DX_DELETE(TextureShader);
-	}
+	//if (TextureShader)
+	//{
+ //       TextureShader->Shutdown();
+	//	DX_DELETE(TextureShader);
+	//}
+    
+    DX_DELETE(Light);
+    if (LightShader)
+    {
+        LightShader->Shutdown();
+        DX_DELETE(LightShader);
+    }
 
     if (Model)
     {
@@ -136,11 +161,17 @@ void GraphicsClass::Shutdown()
 
 bool GraphicsClass::Frame()
 {
-    return Render();
+    static float Rotation = 0.0f;
+
+    Rotation += (float)XM_PI * 0.01f;
+    if (Rotation > 360.0f)
+        Rotation -= 360.0f;
+
+    return Render(Rotation);
 }
 
 
-bool GraphicsClass::Render()
+bool GraphicsClass::Render(float InRotation)
 {
     Direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
 
@@ -151,9 +182,16 @@ bool GraphicsClass::Render()
     Camera->GetViewMatrix(ViewMatrix);
     Direct3D->GetProjectionMatrix(ProjectionMatrix);
 
+    WorldMatrix = XMMatrixRotationY(InRotation);
+
     Model->Bind(Direct3D->GetDeviceContext());
     //ColorShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix);
-    TextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTexture());
+    //TextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTexture());
+    if (!LightShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix
+        , Model->GetTexture(), Light->GetDirection(), Light->GetDiffuseColor()))
+    {
+        return false;
+    }
 
     Direct3D->EndScene();
     return true;

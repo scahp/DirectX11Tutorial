@@ -10,6 +10,8 @@ class CameraClass;
 class ModelClass;
 class ColorShaderClass;
 class TextureShaderClass;
+class LightClass;
+class LightShaderClass;
 
 class GraphicsClass
 {
@@ -23,7 +25,7 @@ public:
 	bool Frame();
 
 private:
-	bool Render();
+	bool Render(float InRotation);
 
 private:
 	D3DClass* Direct3D = nullptr;
@@ -31,4 +33,6 @@ private:
 	ModelClass* Model = nullptr;
 	ColorShaderClass* ColorShader = nullptr;
 	TextureShaderClass* TextureShader = nullptr;
+	LightShaderClass* LightShader = nullptr;
+	LightClass* Light = nullptr;
 };
