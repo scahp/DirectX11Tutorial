@@ -18,14 +18,22 @@ private:
 		XMFLOAT3 Normal;
 	};
 
+	struct ModelType
+	{
+		float X, Y, Z;
+		float TU, TV;
+		float NX, NY, NZ;
+	};
+
 public:
 	ModelClass();
 	ModelClass(const ModelClass& InClass);
 	~ModelClass();
 
-	bool Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InTextureFilename);
+	bool Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InModelFilename, const char* InTextureFilename);
 	void Shutdown();
 	void Bind(ID3D11DeviceContext* InDeviceContext);
+
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture() const;	
 
@@ -36,10 +44,15 @@ private:
 
 	bool LoadTexture(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InFilename);
 	void ReleaseTexture();
+
+	bool LoadModel(const char* InFilename);
+	void ReleaseModel();
+
 private:
 	ID3D11Buffer* VertexBuffer = nullptr;
 	ID3D11Buffer* IndexBuffer = nullptr;
 	int VertexCount = 0;
 	int IndexCount = 0;
 	TextureClass* Texture = nullptr;
+	ModelType* Model = nullptr;
 };

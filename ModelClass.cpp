@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "ModelClass.h"
 #include "TextureClass.h"
+#include <fstream>
 
 ModelClass::ModelClass()
 {
@@ -17,8 +18,11 @@ ModelClass::~ModelClass()
 
 }
 
-bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InTextureFilename)
+bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InModelFilename, const char* InTextureFilename)
 {
+	if (!LoadModel(InModelFilename))
+		return false;
+
 	if (!InitializeBuffers(InDevice))
 		return false;
 
@@ -27,7 +31,9 @@ bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDevic
 
 void ModelClass::Shutdown()
 {
+	ReleaseTexture();
 	ShutdownBuffers();
+	ReleaseModel();
 }
 
 void ModelClass::Bind(ID3D11DeviceContext* InDeviceContext)
@@ -47,9 +53,6 @@ ID3D11ShaderResourceView* ModelClass::GetTexture() const
 
 bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
 {
-	VertexCount = 3;
-	IndexCount = 3;
-
 	VertexType* Vertices = new VertexType[VertexCount];
 	if (!Vertices)
 		return false;
@@ -61,25 +64,14 @@ bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
 		return false;
 	}
 
-	// 정점 배열에 데이터를 설정합니다.
-	Vertices[0].Position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  // Bottom left.
-	//Vertices[0].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	Vertices[0].TexCoord = XMFLOAT2(0.0f, 1.0f);
-	Vertices[0].Normal = XMFLOAT3(0.0f, 1.0f, -1.0f);
+	for (int i = 0; i < VertexCount; ++i)
+	{
+		Vertices[i].Position = XMFLOAT3(Model[i].X, Model[i].Y, Model[i].Z);
+		Vertices[i].TexCoord = XMFLOAT2(Model[i].TU, Model[i].TV);
+		Vertices[i].Normal = XMFLOAT3(Model[i].NX, Model[i].NY, Model[i].NZ);
 
-	Vertices[1].Position = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Top middle.
-	//Vertices[1].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	Vertices[1].TexCoord = XMFLOAT2(0.5f, 0.0f);
-	Vertices[1].Normal = XMFLOAT3(0.0f, 1.0f, -1.0f);
-
-	Vertices[2].Position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	//Vertices[2].Color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-	Vertices[2].TexCoord = XMFLOAT2(1.0f, 1.0f);
-	Vertices[2].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-	Indices[0] = 0;
-	Indices[1] = 1;
-	Indices[2] = 2;
+		Indices[i] = i;
+	}
 
 	D3D11_BUFFER_DESC VertexBufferDesc;
 	VertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -162,4 +154,46 @@ void ModelClass::ReleaseTexture()
 		Texture->Shutdown();
 		DX_DELETE(Texture);
 	}
+}
+
+bool ModelClass::LoadModel(const char* InFilename)
+{
+	std::ifstream FIn;
+	FIn.open(InFilename);
+
+	if (FIn.fail())
+		return false;
+
+	char Input = 0;
+	FIn.get(Input);
+	while (Input != ':')
+		FIn.get(Input);
+
+	FIn >> VertexCount;
+	IndexCount = VertexCount;
+
+	Model = new ModelType[VertexCount];
+	if (!Model)
+		return false;
+
+	FIn.get(Input);
+	while (Input != ':')
+		FIn.get(Input);
+	FIn.get(Input);
+	FIn.get(Input);
+
+	for (int i = 0; i < VertexCount; ++i)
+	{
+		FIn >> Model[i].X >> Model[i].Y >> Model[i].Z;
+		FIn >> Model[i].TU >> Model[i].TV;
+		FIn >> Model[i].NX >> Model[i].NY >> Model[i].NZ;
+	}
+
+	FIn.close();
+	return true;
+}
+
+void ModelClass::ReleaseModel()
+{
+	DX_DELETE(Model);
 }

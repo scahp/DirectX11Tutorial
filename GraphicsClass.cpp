@@ -53,7 +53,7 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
-    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Textures/stone01.tga"))
+    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Model/Cube.txt", "Textures/stone01.tga"))
     {
 		DX_DELETE(Direct3D);
 		DX_DELETE(Camera);
