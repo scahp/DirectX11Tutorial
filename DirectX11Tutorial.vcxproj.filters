@@ -75,6 +75,9 @@
     <ClInclude Include="LightClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MayaModelConverter.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX11Tutorial.cpp">
@@ -114,6 +117,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="LightClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MayaModelConverter.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
