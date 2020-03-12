@@ -26,7 +26,17 @@ void LightClass::SetDirection(float InX, float InY, float InZ)
 	Direction = XMFLOAT3(InX, InY, InZ);
 }
 
-DirectX::XMFLOAT4 LightClass::GetAmbientColor()
+void LightClass::SetSpecularColor(float InRed, float InGreen, float InBlue, float InAlpha)
+{
+	SpecularColor = XMFLOAT4(InRed, InGreen, InBlue, InAlpha);
+}
+
+void LightClass::SetSpecularPower(float InPower)
+{
+	SpecularPower = InPower;
+}
+
+XMFLOAT4 LightClass::GetAmbientColor()
 {
 	return AmbientColor;
 }
@@ -39,4 +49,14 @@ XMFLOAT4 LightClass::GetDiffuseColor()
 XMFLOAT3 LightClass::GetDirection()
 {
 	return Direction;
+}
+
+XMFLOAT4 LightClass::GetSpecularColor()
+{
+	return SpecularColor;
+}
+
+float LightClass::GetSpecularPower()
+{
+	return SpecularPower;
 }

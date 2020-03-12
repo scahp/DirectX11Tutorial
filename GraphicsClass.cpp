@@ -118,6 +118,8 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
     Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
     Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
     Light->SetDirection(0.0f, 0.0f, 1.0f);
+    Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+    Light->SetSpecularPower(32.0f);
 
     return true;
 }
@@ -189,7 +191,8 @@ bool GraphicsClass::Render(float InRotation)
     //ColorShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix);
     //TextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTexture());
     if (!LightShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix
-        , Model->GetTexture(), Light->GetDirection(), Light->GetAmbientColor(), Light->GetDiffuseColor()))
+        , Model->GetTexture(), Light->GetDirection(), Light->GetAmbientColor(), Light->GetDiffuseColor(), Camera->GetPosition()
+        , Light->GetSpecularColor(), Light->GetSpecularPower()))
     {
         return false;
     }

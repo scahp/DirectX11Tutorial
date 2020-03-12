@@ -1,5 +1,5 @@
 ﻿// DirectX11Tutorial.cpp : 애플리케이션에 대한 진입점을 정의합니다.
-// Next : https://copynull.tistory.com/254?category=649932
+// Next : https://copynull.tistory.com/260?category=649932
 
 #include "stdafx.h"
 #include "framework.h"
