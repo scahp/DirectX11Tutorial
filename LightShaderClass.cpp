@@ -26,10 +26,15 @@ void LightShaderClass::Shutdown()
 	ShutdownShader();
 }
 
-bool LightShaderClass::Render(ID3D11DeviceContext* InDeviceContext, int InIndexCount, XMMATRIX InWorldMatrix, XMMATRIX InViewMatrix, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView* InTexture, XMFLOAT3 InLightDirection, XMFLOAT4 InDiffuseColor)
+bool LightShaderClass::Render(ID3D11DeviceContext* InDeviceContext, int InIndexCount, XMMATRIX InWorldMatrix
+	, XMMATRIX InViewMatrix, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView* InTexture, XMFLOAT3 InLightDirection
+	, XMFLOAT4 InAmbientColor, XMFLOAT4 InDiffuseColor)
 {
-	if (!SetShaderParameters(InDeviceContext, InWorldMatrix, InViewMatrix, InProjectionMatrix, InTexture, InLightDirection, InDiffuseColor))
+	if (!SetShaderParameters(InDeviceContext, InWorldMatrix, InViewMatrix, InProjectionMatrix, InTexture
+		, InLightDirection, InAmbientColor, InDiffuseColor))
+	{
 		return false;
+	}
 
 	RenderShader(InDeviceContext, InIndexCount);
 	return true;
@@ -188,7 +193,7 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* InErrorMessage, HWND
 }
 
 bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* InDeviceContext, XMMATRIX InWorldMatrix, XMMATRIX InViewMatrix
-	, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView* InTexture, XMFLOAT3 InLightDirection, XMFLOAT4 InDiffuseColor)
+	, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView* InTexture, XMFLOAT3 InLightDirection, XMFLOAT4 InAmbientColor, XMFLOAT4 InDiffuseColor)
 {
 	InWorldMatrix = XMMatrixTranspose(InWorldMatrix);
 	InViewMatrix = XMMatrixTranspose(InViewMatrix);
@@ -216,6 +221,7 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* InDeviceContext,
 
 	LightBufferType* DataPtr2 = (LightBufferType*)MappedResource.pData;
 
+	DataPtr2->AmbientColor = InAmbientColor;
 	DataPtr2->DiffuseColor = InDiffuseColor;
 	DataPtr2->LightDirection = InLightDirection;
 	DataPtr2->Padding = 0.0f;

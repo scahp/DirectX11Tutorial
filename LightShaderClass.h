@@ -12,6 +12,7 @@ private:
 
 	struct LightBufferType
 	{
+		XMFLOAT4 AmbientColor;
 		XMFLOAT4 DiffuseColor;
 		XMFLOAT3 LightDirection;
 		float Padding;				// 구조체가 16의 배수가 되게 하기 위해서 추가
@@ -25,13 +26,16 @@ public:
 	bool Initialize(ID3D11Device* InDevice, HWND InHwnd);
 	void Shutdown();
 	bool Render(ID3D11DeviceContext * InDeviceContext, int InIndexCount, XMMATRIX InWorldMatrix, XMMATRIX InViewMatrix
-		, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView * InTexture, XMFLOAT3 InLightDirection, XMFLOAT4 InDiffuseColor);
+		, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView * InTexture, XMFLOAT3 InLightDirection
+		, XMFLOAT4 InAmbientColor, XMFLOAT4 InDiffuseColor);
 
 private:
 	bool InitializeShader(ID3D11Device* InDevice, HWND InHwnd, const WCHAR* InVSFilename, const WCHAR* InPSFilename);
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob* InErrorMessage, HWND InHwnd, const WCHAR* InShaderFilename);
-	bool SetShaderParameters(ID3D11DeviceContext* InDeviceContext, XMMATRIX InWorldMatrix, XMMATRIX InViewMatrix, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView* InTexture, XMFLOAT3 InLightDirection, XMFLOAT4 InDiffuseColor);
+	bool SetShaderParameters(ID3D11DeviceContext* InDeviceContext, XMMATRIX InWorldMatrix, XMMATRIX InViewMatrix
+		, XMMATRIX InProjectionMatrix, ID3D11ShaderResourceView* InTexture, XMFLOAT3 InLightDirection
+		, XMFLOAT4 inAmbientColor, XMFLOAT4 InDiffuseColor);
 	void RenderShader(ID3D11DeviceContext* InDeviceContext, int InIndexCount);
 
 private:
