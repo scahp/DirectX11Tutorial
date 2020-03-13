@@ -7,6 +7,7 @@
 #include "TextureShaderClass.h"
 #include "LightClass.h"
 #include "LightShaderClass.h"
+#include "BitmapClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -82,44 +83,54 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
   //      return false;
   //  }
 
-	//TextureShader = new TextureShaderClass();
-	//if (!TextureShader)
-	//{
-	//	DX_DELETE(Direct3D);
-	//	DX_DELETE(Camera);
-	//	DX_DELETE(Model);
-	//	return false;
-	//}
+	TextureShader = new TextureShaderClass();
+	if (!TextureShader)
+	{
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+		DX_DELETE(Model);
+		return false;
+	}
 
-	//if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
-	//{
-	//	DX_DELETE(Direct3D);
-	//	DX_DELETE(Camera);
-	//	DX_DELETE(Model);
-	//	DX_DELETE(TextureShader);
-	//	MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
-	//	return false;
-	//}
+	if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
+	{
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+		DX_DELETE(Model);
+		DX_DELETE(TextureShader);
+		MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
+		return false;
+	}
 
-    LightShader = new LightShaderClass();
-    if (!LightShader)
+    Bitmap = new BitmapClass();
+    if (!Bitmap)
         return false;
-
-    if (!LightShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    
+    if (!Bitmap->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), InScreenWidth, InScreenHeight, "Textures/stone01.tga", 256, 256))
     {
-        MessageBox(InHwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+        MessageBox(InHwnd, TEXT("Could not initlaize the bitmap object."), L"Error", MB_OK);
         return false;
     }
 
-    Light = new LightClass();
-    if (!Light)
-        return false;
+    //LightShader = new LightShaderClass();
+    //if (!LightShader)
+    //    return false;
 
-    Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
-    Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-    Light->SetDirection(0.0f, 0.0f, 1.0f);
-    Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-    Light->SetSpecularPower(32.0f);
+    //if (!LightShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    //{
+    //    MessageBox(InHwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+    //    return false;
+    //}
+
+    //Light = new LightClass();
+    //if (!Light)
+    //    return false;
+
+    //Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+    //Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //Light->SetDirection(0.0f, 0.0f, 1.0f);
+    //Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //Light->SetSpecularPower(32.0f);
 
     return true;
 }
@@ -132,12 +143,19 @@ void GraphicsClass::Shutdown()
     //    ColorShader->Shutdown();
     //    DX_DELETE(ColorShader);
     //}
-	//if (TextureShader)
-	//{
- //       TextureShader->Shutdown();
-	//	DX_DELETE(TextureShader);
-	//}
-    
+
+	if (Bitmap)
+	{
+		Bitmap->Shutdown();
+		DX_DELETE(Bitmap);
+	}
+	
+    if (TextureShader)
+	{
+        TextureShader->Shutdown();
+		DX_DELETE(TextureShader);
+	}
+   
     DX_DELETE(Light);
     if (LightShader)
     {
@@ -180,22 +198,33 @@ bool GraphicsClass::Render(float InRotation)
 
     Camera->Render();
 
-    XMMATRIX WorldMatrix, ViewMatrix, ProjectionMatrix;
+    XMMATRIX WorldMatrix, ViewMatrix, ProjectionMatrix, OrthoMatrix;
     Direct3D->GetWorldMatrix(WorldMatrix);
     Camera->GetViewMatrix(ViewMatrix);
     Direct3D->GetProjectionMatrix(ProjectionMatrix);
+    Direct3D->GetOrthoMatrix(OrthoMatrix);
 
-    WorldMatrix = XMMatrixRotationY(InRotation);
+    //WorldMatrix = XMMatrixRotationY(InRotation);
 
-    Model->Bind(Direct3D->GetDeviceContext());
+    // 2D 렌더링 전 Z 버퍼를 끕니다.
+    Direct3D->TurnZBufferOff();
+
+    if (!Bitmap->Render(Direct3D->GetDeviceContext(), 100, 100))
+        return false;
+
+    //Model->Bind(Direct3D->GetDeviceContext());
     //ColorShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix);
     //TextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTexture());
-    if (!LightShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix
-        , Model->GetTexture(), Light->GetDirection(), Light->GetAmbientColor(), Light->GetDiffuseColor(), Camera->GetPosition()
-        , Light->GetSpecularColor(), Light->GetSpecularPower()))
+    //if (!LightShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix
+    //    , Model->GetTexture(), Light->GetDirection(), Light->GetAmbientColor(), Light->GetDiffuseColor(), Camera->GetPosition()
+    //    , Light->GetSpecularColor(), Light->GetSpecularPower()))
+    if (!TextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, OrthoMatrix, Bitmap->GetTexture()))
     {
         return false;
     }
+
+    // 2D 렌더링 전 Z 버퍼를 켭니다.
+    Direct3D->TurnZBufferOn();
 
     Direct3D->EndScene();
     return true;

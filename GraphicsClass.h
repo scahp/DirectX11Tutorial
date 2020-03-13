@@ -12,6 +12,7 @@ class ColorShaderClass;
 class TextureShaderClass;
 class LightClass;
 class LightShaderClass;
+class BitmapClass;
 
 class GraphicsClass
 {
@@ -35,4 +36,5 @@ private:
 	TextureShaderClass* TextureShader = nullptr;
 	LightShaderClass* LightShader = nullptr;
 	LightClass* Light = nullptr;
+	BitmapClass* Bitmap = nullptr;
 };
