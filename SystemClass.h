@@ -3,6 +3,7 @@
 
 class InputClass;
 class GraphicsClass;
+class PositionClass;
 
 class SystemClass
 {
@@ -29,6 +30,7 @@ private:
 
 	InputClass* Input = nullptr;
 	GraphicsClass* Graphics = nullptr;
+	PositionClass* Position = nullptr;
 };
 
 static SystemClass* ApplicationHandle = 0;

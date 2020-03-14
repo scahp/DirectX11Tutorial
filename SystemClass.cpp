@@ -5,6 +5,7 @@
 #include "InputClass.h"
 #include "GraphicsClass.h"
 #include "SystemClass.h"
+#include "PositionClass.h"
 
 LRESULT CALLBACK SystemClassWndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 
@@ -37,11 +38,17 @@ bool SystemClass::Initialize()
 	if (!Graphics)
 		return false;
 
+	Position = new PositionClass();
+	if (!Position)
+		return false;
+
 	return Graphics->Initialize(ScreenWidth, ScreenHeight, Hwnd);
 }
 
 void SystemClass::Shutdown()
 {
+	DX_DELETE(Position);
+
 	if (Graphics)
 	{
 		Graphics->Shutdown();
@@ -86,7 +93,18 @@ bool SystemClass::Frame()
 	if (Input->IsKeyDown(VK_ESCAPE))
 		return false;
 
-	return Graphics->Frame();
+	// Position->SetFrameTime(Timer->GetTime());
+
+	//bool KeyDown = Input->IsLeftArrowPressed();
+	//Position->TurnLeft(KeyDown);
+
+	//KeyDown = Input->IsRightArrowPressed();
+	//Position->TurnRight(KeyDown);
+
+	float RotationY = 0.0f;
+	Position->GetRotation(RotationY);
+
+	return Graphics->Frame(RotationY);
 }
 
 LRESULT CALLBACK SystemClass::MessageHandler(HWND InHwnd, UINT InMsg, WPARAM InWparam, LPARAM InLparam)

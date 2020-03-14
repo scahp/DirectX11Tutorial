@@ -13,6 +13,8 @@ class TextureShaderClass;
 class LightClass;
 class LightShaderClass;
 class BitmapClass;
+class ModelListClass;
+class FrustumClass;
 
 class GraphicsClass
 {
@@ -23,7 +25,7 @@ public:
 
 	bool Initialize(int InScreenWidth, int InScreenHeight, HWND InHwnd);
 	void Shutdown();
-	bool Frame();
+	bool Frame(float RotationY);
 
 private:
 	bool Render(float InRotation);
@@ -37,4 +39,6 @@ private:
 	LightShaderClass* LightShader = nullptr;
 	LightClass* Light = nullptr;
 	BitmapClass* Bitmap = nullptr;
+	ModelListClass* ModelList = nullptr;
+	FrustumClass* Frustum = nullptr;
 };
