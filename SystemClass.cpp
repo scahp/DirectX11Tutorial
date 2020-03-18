@@ -32,7 +32,11 @@ bool SystemClass::Initialize()
 	if (!Input)
 		return false;
 
-	Input->Initialize();
+	if (!Input->Initialize(Instance, Hwnd, ScreenWidth, ScreenHeight))
+	{
+		MessageBox(Hwnd, TEXT("Could not initialize the input object."), TEXT("Error"), MB_OK);
+		return false;
+	}
 
 	Graphics = new GraphicsClass();
 	if (!Graphics)
@@ -52,14 +56,13 @@ void SystemClass::Shutdown()
 	if (Graphics)
 	{
 		Graphics->Shutdown();
-		delete Graphics;
-		Graphics = nullptr;
+		DX_DELETE(Graphics);
 	}
 
 	if (Input)
 	{
-		delete Input;
-		Input = nullptr;
+		Input->Shutdown();
+		DX_DELETE(Input);
 	}
 
 	ShutdownWindows();
@@ -85,21 +88,19 @@ void SystemClass::Run()
 			if (!Frame())
 				break;
 		}
+
+		if (Input->IsEscapePressed())
+			break;
 	}
 }
 
 bool SystemClass::Frame()
 {
-	if (Input->IsKeyDown(VK_ESCAPE))
+	if (!Input->Frame())
 		return false;
 
-	// Position->SetFrameTime(Timer->GetTime());
-
-	//bool KeyDown = Input->IsLeftArrowPressed();
-	//Position->TurnLeft(KeyDown);
-
-	//KeyDown = Input->IsRightArrowPressed();
-	//Position->TurnRight(KeyDown);
+	int MouseX = 0, MouseY = 0;
+	Input->GetMouseLocation(MouseX, MouseY);
 
 	float RotationY = 0.0f;
 	Position->GetRotation(RotationY);
@@ -109,23 +110,15 @@ bool SystemClass::Frame()
 
 LRESULT CALLBACK SystemClass::MessageHandler(HWND InHwnd, UINT InMsg, WPARAM InWparam, LPARAM InLparam)
 {
-	switch (InMsg)
-	{
-	case WM_KEYDOWN:
-	{
-		Input->KeyDown((unsigned int)InWparam);
-		return 0;
-	}
-	case WM_KEYUP:
-		Input->KeyUp((unsigned int)InWparam);
-		return 0;
-	default:
-		return DefWindowProc(InHwnd, InMsg, InWparam, InLparam);
-	}
+	return DefWindowProc(InHwnd, InMsg, InWparam, InLparam);
 }
 
 void SystemClass::InitializeWindow(int& OutScreenWidth, int& OutScreenHeight)
 {
+	ApplicationHandle = this;
+	Instance = GetModuleHandle(NULL);
+	ApplicationName = TEXT("DX11Tutorial");
+
 	int PosX = 0;
 	int PosY = 0;
 
