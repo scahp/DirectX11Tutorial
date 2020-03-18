@@ -34,7 +34,8 @@ bool InputClass::Initialize(HINSTANCE InHinstance, HWND InHwnd, int InScreenWidt
 	if (FAILED(Result))
 		return false;
 
-	// 다른 프로그램과 공유하지 않도록 키보드의 협조 수준을 설정합니다
+	// 창모드인 경우 DISCL_BACKGROUND | DISCL_NONEXCLUSIVE
+	// 전체화면인 경우 DISCL_FOREGROUND | DISCL_EXCLUSIVE	
 	Result = Keyboard->SetCooperativeLevel(InHwnd, DISCL_BACKGROUND | DISCL_NONEXCLUSIVE);
 	if (FAILED(Result))
 		return false;
@@ -54,7 +55,8 @@ bool InputClass::Initialize(HINSTANCE InHinstance, HWND InHwnd, int InScreenWidt
 	if (FAILED(Result))
 		return false;
 
-	// 다른 프로그램과 공유 할 수 있도록 마우스의 협력 수준을 설정합니다.
+	// 창모드인 경우 DISCL_BACKGROUND | DISCL_NONEXCLUSIVE
+	// 전체화면인 경우 DISCL_FOREGROUND | DISCL_EXCLUSIVE	
 	Result = Mouse->SetCooperativeLevel(InHwnd, DISCL_BACKGROUND | DISCL_NONEXCLUSIVE);
 	if (FAILED(Result))
 		return false;
