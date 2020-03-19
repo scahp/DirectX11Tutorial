@@ -90,6 +90,12 @@
     <ClInclude Include="PositionClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MultiTextureShaderClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureArrayClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX11Tutorial.cpp">
@@ -146,6 +152,12 @@
     <ClCompile Include="PositionClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="MultiTextureShaderClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureArrayClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DirectX11Tutorial.rc">
@@ -177,6 +189,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Light.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Multitexture.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Multitexture.ps">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

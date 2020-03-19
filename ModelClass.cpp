@@ -18,7 +18,8 @@ ModelClass::~ModelClass()
 
 }
 
-bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InModelFilename, const char* InTextureFilename)
+bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InModelFilename
+	, const WCHAR* InTextureFilename1, const WCHAR* InTextureFilename2)
 {
 	if (!LoadModel(InModelFilename))
 		return false;
@@ -26,12 +27,12 @@ bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDevic
 	if (!InitializeBuffers(InDevice))
 		return false;
 
-	return LoadTexture(InDevice, InDeviceContext, InTextureFilename);
+	return LoadTextures(InDevice, InTextureFilename1, InTextureFilename2);
 }
 
 void ModelClass::Shutdown()
 {
-	ReleaseTexture();
+	ReleaseTextures();
 	ShutdownBuffers();
 	ReleaseModel();
 }
@@ -46,9 +47,27 @@ int ModelClass::GetIndexCount()
 	return IndexCount;
 }
 
-ID3D11ShaderResourceView* ModelClass::GetTexture() const
+ID3D11ShaderResourceView** ModelClass::GetTextureArray()
 {
-	return Texture->GetTexture();
+	return TextureArray->GetTextureArray();
+}
+
+bool ModelClass::LoadTextures(ID3D11Device* InDevice, const WCHAR* InFilename1, const WCHAR* InFilename2)
+{
+	TextureArray = new TextureArrayClass();
+	if (!TextureArray)
+		return false;
+
+	return TextureArray->Initialize(InDevice, InFilename1, InFilename2);
+}
+
+void ModelClass::ReleaseTextures()
+{
+	if (TextureArray)
+	{
+		TextureArray->Shutdown();
+		DX_DELETE(TextureArray);
+	}
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
@@ -138,24 +157,6 @@ void ModelClass::BindBuffers(ID3D11DeviceContext* InDeviceContext)
 	InDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InFilename)
-{
-	Texture = new TextureClass();
-	if (!Texture)
-		return false;
-
-	return Texture->Initialize(InDevice, InDeviceContext, InFilename);
-}
-
-void ModelClass::ReleaseTexture()
-{
-	if (Texture)
-	{
-		Texture->Shutdown();
-		DX_DELETE(Texture);
-	}
-}
-
 bool ModelClass::LoadModel(const char* InFilename)
 {
 	std::ifstream FIn;
@@ -195,5 +196,5 @@ bool ModelClass::LoadModel(const char* InFilename)
 
 void ModelClass::ReleaseModel()
 {
-	DX_DELETE(Model);
+	DX_DELETE_ARRAY(Model);
 }

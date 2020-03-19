@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "TextureArrayClass.h"
 
 class TextureClass;
 
@@ -30,20 +31,20 @@ public:
 	ModelClass(const ModelClass& InClass);
 	~ModelClass();
 
-	bool Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InModelFilename, const char* InTextureFilename);
+	bool Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InModelFilename
+		, const WCHAR* InTextureFilename1, const WCHAR* InTextureFilename2);
 	void Shutdown();
 	void Bind(ID3D11DeviceContext* InDeviceContext);
 
 	int GetIndexCount();
-	ID3D11ShaderResourceView* GetTexture() const;	
+	ID3D11ShaderResourceView** GetTextureArray();
+	bool LoadTextures(ID3D11Device* InDevice, const WCHAR* InFilename1, const WCHAR* InFilename2);
 
+	void ReleaseTextures();
 private:
 	bool InitializeBuffers(ID3D11Device* InDevice);
 	void ShutdownBuffers();
 	void BindBuffers(ID3D11DeviceContext* InDeviceContext);
-
-	bool LoadTexture(ID3D11Device* InDevice, ID3D11DeviceContext* InDeviceContext, const char* InFilename);
-	void ReleaseTexture();
 
 	bool LoadModel(const char* InFilename);
 	void ReleaseModel();
@@ -53,6 +54,6 @@ private:
 	ID3D11Buffer* IndexBuffer = nullptr;
 	int VertexCount = 0;
 	int IndexCount = 0;
-	TextureClass* Texture = nullptr;
 	ModelType* Model = nullptr;
+	TextureArrayClass* TextureArray = nullptr;
 };

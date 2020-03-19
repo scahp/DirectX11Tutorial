@@ -10,6 +10,7 @@
 #include "BitmapClass.h"
 #include "ModelListClass.h"
 #include "FrustumClass.h"
+#include "MultiTextureShaderClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -56,7 +57,7 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
-    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Model/sphere.txt", "Textures/stone01.tga"))
+    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Model/square.txt", TEXT("Textures/stone01.dds"), TEXT("Textures/dirt01.dds")))
     {
 		DX_DELETE(Direct3D);
 		DX_DELETE(Camera);
@@ -114,39 +115,49 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
  //       return false;
  //   }
 
-    LightShader = new LightShaderClass();
-    if (!LightShader)
+ //   LightShader = new LightShaderClass();
+ //   if (!LightShader)
+ //       return false;
+
+ //   if (!LightShader->Initialize(Direct3D->GetDevice(), InHwnd))
+ //   {
+ //       MessageBox(InHwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+ //       return false;
+ //   }
+
+ //   Light = new LightClass();
+ //   if (!Light)
+ //       return false;
+
+ //   Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+ //   Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+ //   Light->SetDirection(0.0f, 0.0f, 1.0f);
+ //   Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+ //   Light->SetSpecularPower(32.0f);
+
+ //   ModelList = new ModelListClass();
+ //   if (!ModelList)
+ //       return false;
+
+	//if (!ModelList->Initialize(25))
+ //   {
+ //       MessageBox(InHwnd, TEXT("Could not initliaze the model list object."), TEXT("Error"), MB_OK);
+ //       return false;
+ //   }
+
+    //Frustum = new FrustumClass();
+    //if (!Frustum)
+    //    return false;
+
+    MultiTextureShader = new MultiTextureShaderClass();
+    if (!MultiTextureShader)
         return false;
 
-    if (!LightShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    if (!MultiTextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
     {
-        MessageBox(InHwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+        MessageBox(InHwnd, TEXT("Could not initialize the multitexture shader object"), TEXT("Error"), MB_OK);
         return false;
     }
-
-    Light = new LightClass();
-    if (!Light)
-        return false;
-
-    Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
-    Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-    Light->SetDirection(0.0f, 0.0f, 1.0f);
-    Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-    Light->SetSpecularPower(32.0f);
-
-    ModelList = new ModelListClass();
-    if (!ModelList)
-        return false;
-
-	if (!ModelList->Initialize(25))
-    {
-        MessageBox(InHwnd, TEXT("Could not initliaze the model list object."), TEXT("Error"), MB_OK);
-        return false;
-    }
-
-    Frustum = new FrustumClass();
-    if (!Frustum)
-        return false;
 
     return true;
 }
@@ -154,12 +165,12 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
 
 void GraphicsClass::Shutdown()
 {
-    DX_DELETE(Frustum);
-    if (ModelList)
-    {
-        ModelList->Shutdown();
-        DX_DELETE(ModelList);
-    }
+    //DX_DELETE(Frustum);
+    //if (ModelList)
+    //{
+    //    ModelList->Shutdown();
+    //    DX_DELETE(ModelList);
+    //}
 
     //if (ColorShader)
     //{
@@ -167,23 +178,29 @@ void GraphicsClass::Shutdown()
     //    DX_DELETE(ColorShader);
     //}
 
-	if (Bitmap)
-	{
-		Bitmap->Shutdown();
-		DX_DELETE(Bitmap);
-	}
-	
-    if (TextureShader)
-	{
-        TextureShader->Shutdown();
-		DX_DELETE(TextureShader);
-	}
-   
-    DX_DELETE(Light);
-    if (LightShader)
+	//if (Bitmap)
+	//{
+	//	Bitmap->Shutdown();
+	//	DX_DELETE(Bitmap);
+	//}
+	//
+ //   if (TextureShader)
+	//{
+ //       TextureShader->Shutdown();
+	//	DX_DELETE(TextureShader);
+	//}
+ //  
+ //   DX_DELETE(Light);
+ //   if (LightShader)
+ //   {
+ //       LightShader->Shutdown();
+ //       DX_DELETE(LightShader);
+ //   }
+
+    if (MultiTextureShader)
     {
-        LightShader->Shutdown();
-        DX_DELETE(LightShader);
+        MultiTextureShader->Shutdown();
+        DX_DELETE(MultiTextureShader);
     }
 
     if (Model)
@@ -220,35 +237,39 @@ bool GraphicsClass::Render(float InRotation)
     Direct3D->GetProjectionMatrix(ProjectionMatrix);
     Direct3D->GetOrthoMatrix(OrthoMatrix);
 
-    Frustum->ConstructFrustum(SCREEN_DEPTH_FAR, ProjectionMatrix, ViewMatrix);
+    Model->Bind(Direct3D->GetDeviceContext());
+    MultiTextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount()
+        , WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray());
 
-    int ModelCount = ModelList->GetModelCount();
+ //   Frustum->ConstructFrustum(SCREEN_DEPTH_FAR, ProjectionMatrix, ViewMatrix);
 
-    int RenderCount = 0;
-	float PositionX = 0;
-	float PositionY = 0;
-	float PositionZ = 0;
-	float Radius = 1.0f;
-	XMFLOAT4 Color;
+ //   int ModelCount = ModelList->GetModelCount();
 
-    for (int Index = 0; Index < ModelCount; ++Index)
-    {
-        ModelList->GetData(Index, PositionX, PositionY, PositionZ, Color);
+ //   int RenderCount = 0;
+	//float PositionX = 0;
+	//float PositionY = 0;
+	//float PositionZ = 0;
+	//float Radius = 1.0f;
+	//XMFLOAT4 Color;
 
-        if (Frustum->CheckSphere(PositionX, PositionY, PositionZ, Radius))
-        {
-            WorldMatrix = XMMatrixTranslation(PositionX, PositionY, PositionZ);
+ //   for (int Index = 0; Index < ModelCount; ++Index)
+ //   {
+ //       ModelList->GetData(Index, PositionX, PositionY, PositionZ, Color);
 
-            Model->Bind(Direct3D->GetDeviceContext());
+ //       if (Frustum->CheckSphere(PositionX, PositionY, PositionZ, Radius))
+ //       {
+ //           WorldMatrix = XMMatrixTranslation(PositionX, PositionY, PositionZ);
 
-            LightShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix
-                , Model->GetTexture(), Light->GetDirection(), Light->GetAmbientColor(), Color, Camera->GetPosition()
-                , Light->GetSpecularColor(), Light->GetSpecularPower());
+ //           Model->Bind(Direct3D->GetDeviceContext());
 
-            Direct3D->GetWorldMatrix(WorldMatrix);
-            ++RenderCount;
-        }
-    }
+ //           LightShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix
+ //               , Model->GetTexture(), Light->GetDirection(), Light->GetAmbientColor(), Color, Camera->GetPosition()
+ //               , Light->GetSpecularColor(), Light->GetSpecularPower());
+
+ //           Direct3D->GetWorldMatrix(WorldMatrix);
+ //           ++RenderCount;
+ //       }
+ //   }
 
     Direct3D->EndScene();
     return true;
