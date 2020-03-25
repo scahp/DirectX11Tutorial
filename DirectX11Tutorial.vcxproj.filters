@@ -105,6 +105,9 @@
     <ClInclude Include="TimerClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="BumpMapShaderClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX11Tutorial.cpp">
@@ -176,6 +179,9 @@
     <ClCompile Include="TimerClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="BumpMapShaderClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DirectX11Tutorial.rc">
@@ -213,6 +219,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="Shaders\Multitexture.ps">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Bumpmap.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Bumpmap.ps">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

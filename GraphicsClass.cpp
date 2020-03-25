@@ -11,6 +11,7 @@
 #include "ModelListClass.h"
 #include "FrustumClass.h"
 #include "MultiTextureShaderClass.h"
+#include "BumpMapShaderClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -57,7 +58,7 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
-    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Model/square.txt", TEXT("Textures/stone01.dds"), TEXT("Textures/dirt01.dds")))
+    if (!Model->Initialize(Direct3D->GetDevice(), Direct3D->GetDeviceContext(), "Model/cube.txt", TEXT("Textures/stone01.dds"), TEXT("Textures/bump01.dds")))
     {
 		DX_DELETE(Direct3D);
 		DX_DELETE(Camera);
@@ -125,13 +126,13 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
  //       return false;
  //   }
 
- //   Light = new LightClass();
- //   if (!Light)
- //       return false;
+    Light = new LightClass();
+    if (!Light)
+        return false;
 
- //   Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
- //   Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
- //   Light->SetDirection(0.0f, 0.0f, 1.0f);
+    //Light->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+    Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+    Light->SetDirection(0.0f, 0.0f, 1.0f);
  //   Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
  //   Light->SetSpecularPower(32.0f);
 
@@ -148,6 +149,16 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
     //Frustum = new FrustumClass();
     //if (!Frustum)
     //    return false;
+
+    BumpMapShader = new BumpMapShaderClass();
+    if (!BumpMapShader)
+        return false;
+
+    if (!BumpMapShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    {
+        MessageBox(InHwnd, TEXT("Could not initialize the bump map shader object."), TEXT("Error"), MB_OK);
+        return false;
+    }
 
     MultiTextureShader = new MultiTextureShaderClass();
     if (!MultiTextureShader)
@@ -190,12 +201,19 @@ void GraphicsClass::Shutdown()
 	//	DX_DELETE(TextureShader);
 	//}
  //  
- //   DX_DELETE(Light);
- //   if (LightShader)
- //   {
- //       LightShader->Shutdown();
- //       DX_DELETE(LightShader);
- //   }
+    DX_DELETE(Light);
+
+    if (BumpMapShader)
+    {
+        BumpMapShader->Shutdown();
+        DX_DELETE(BumpMapShader);
+    }
+
+    //if (LightShader)
+    //{
+    //    LightShader->Shutdown();
+    //    DX_DELETE(LightShader);
+    //}    
 
     if (MultiTextureShader)
     {
@@ -237,9 +255,21 @@ bool GraphicsClass::Render(float InRotation)
     Direct3D->GetProjectionMatrix(ProjectionMatrix);
     Direct3D->GetOrthoMatrix(OrthoMatrix);
 
+	static float Rotation = 0.0f;
+	Rotation += (float)XM_PI * 0.0025f;
+	if (Rotation > 360.0f)
+	{
+		Rotation -= 360.0f;
+	}
+	WorldMatrix = XMMatrixRotationY(Rotation);
+    
     Model->Bind(Direct3D->GetDeviceContext());
-    MultiTextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount()
-        , WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray());
+
+    BumpMapShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray(),
+        Light->GetDirection(), Light->GetDiffuseColor());
+
+    //MultiTextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount()
+    //    , WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray());
 
  //   Frustum->ConstructFrustum(SCREEN_DEPTH_FAR, ProjectionMatrix, ViewMatrix);
 

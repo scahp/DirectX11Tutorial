@@ -1,0 +1,48 @@
+
+Texture2D ShaderTextures[2];
+SamplerState SamplerType;
+
+cbuffer LightBuffer
+{
+    float4 DiffuseColor;
+    float3 LightDirection;
+};
+
+struct PixelInputType
+{
+    float4 Position : SV_POSITION;
+    float2 Tex : TEXCOORD0;
+    float3 Normal : NORMAL;
+    float3 Tangent : TANGENT;
+    float3 Binormal : BINORMAL;
+};
+
+float4 BumpMapPixelShader(PixelInputType Input) : SV_TARGET
+{
+    float4 TextureColor;
+    float4 BumpMap;
+    float3 BumpNormal;
+    float3 LightDir;
+    float LightIntensity;
+    float4 Color;
+    
+    TextureColor = ShaderTextures[0].Sample(SamplerType, Input.Tex);
+    
+    BumpMap = ShaderTextures[1].Sample(SamplerType, Input.Tex);
+    BumpMap = (BumpMap * 2.0f) - 1.0f;      // 9~1 을 -1~1 사이로 변경
+    
+    // 범프맵의 데이터에서 법선을 계산.
+    BumpNormal = (BumpMap.x * Input.Tangent) + (BumpMap.y * Input.Binormal) + (BumpMap.z * Input.Normal);
+    
+    BumpNormal = normalize(BumpNormal);
+    
+    LightDir = -LightDirection;
+    
+    LightIntensity = saturate(dot(BumpNormal, LightDir));
+    
+    Color = saturate(DiffuseColor * LightIntensity);
+    
+    Color *= TextureColor;
+    
+    return Color;
+}

@@ -24,6 +24,8 @@ bool ModelClass::Initialize(ID3D11Device* InDevice, ID3D11DeviceContext* InDevic
 	if (!LoadModel(InModelFilename))
 		return false;
 
+	CalculateModelVectors();
+
 	if (!InitializeBuffers(InDevice))
 		return false;
 
@@ -86,8 +88,10 @@ bool ModelClass::InitializeBuffers(ID3D11Device* InDevice)
 	for (int i = 0; i < VertexCount; ++i)
 	{
 		Vertices[i].Position = XMFLOAT3(Model[i].X, Model[i].Y, Model[i].Z);
-		Vertices[i].TexCoord = XMFLOAT2(Model[i].TU, Model[i].TV);
+		Vertices[i].Texture = XMFLOAT2(Model[i].TU, Model[i].TV);
 		Vertices[i].Normal = XMFLOAT3(Model[i].NX, Model[i].NY, Model[i].NZ);
+		Vertices[i].Tangent = XMFLOAT3(Model[i].TX, Model[i].TY, Model[i].TZ);
+		Vertices[i].Binormal = XMFLOAT3(Model[i].BX, Model[i].BY, Model[i].BZ);
 
 		Indices[i] = i;
 	}
@@ -197,4 +201,149 @@ bool ModelClass::LoadModel(const char* InFilename)
 void ModelClass::ReleaseModel()
 {
 	DX_DELETE_ARRAY(Model);
+}
+
+void ModelClass::CalculateModelVectors()
+{
+	TempVertexType Vertex1, Vertex2, Vertex3;
+	VectorType Tangent, Binormal, Normal;
+
+	int FaceCount = VertexCount / 3;
+
+	int Index = 0;
+
+	for (int i = 0; i < FaceCount; ++i)
+	{
+		Vertex1.X = Model[Index].X;
+		Vertex1.Y = Model[Index].Y;
+		Vertex1.Z = Model[Index].Z;
+		Vertex1.TU = Model[Index].TU;
+		Vertex1.TV = Model[Index].TV;
+		Vertex1.NX = Model[Index].NX;
+		Vertex1.NY = Model[Index].NY;
+		Vertex1.NZ = Model[Index].NZ;
+		Index++;
+
+		Vertex2.X = Model[Index].X;
+		Vertex2.Y = Model[Index].Y;
+		Vertex2.Z = Model[Index].Z;
+		Vertex2.TU = Model[Index].TU;
+		Vertex2.TV = Model[Index].TV;
+		Vertex2.NX = Model[Index].NX;
+		Vertex2.NY = Model[Index].NY;
+		Vertex2.NZ = Model[Index].NZ;
+		Index++;
+
+		Vertex3.X = Model[Index].X;
+		Vertex3.Y = Model[Index].Y;
+		Vertex3.Z = Model[Index].Z;
+		Vertex3.TU = Model[Index].TU;
+		Vertex3.TV = Model[Index].TV;
+		Vertex3.NX = Model[Index].NX;
+		Vertex3.NY = Model[Index].NY;
+		Vertex3.NZ = Model[Index].NZ;
+		Index++;
+
+		CalculateTangentBinormal(Vertex1, Vertex2, Vertex3, Tangent, Binormal);
+
+		CalculateNormal(Tangent, Binormal, Normal);
+
+		Model[Index - 1].NX = Normal.X;
+		Model[Index - 1].NY = Normal.Y;
+		Model[Index - 1].NZ = Normal.Z;
+		Model[Index - 1].TX = Tangent.X;
+		Model[Index - 1].TY = Tangent.Y;
+		Model[Index - 1].TZ = Tangent.Z;
+		Model[Index - 1].BX = Binormal.X;
+		Model[Index - 1].BY = Binormal.Y;
+		Model[Index - 1].BZ = Binormal.Z;
+
+		Model[Index - 2].NX = Normal.X;
+		Model[Index - 2].NY = Normal.Y;
+		Model[Index - 2].NZ = Normal.Z;
+		Model[Index - 2].TX = Tangent.X;
+		Model[Index - 2].TY = Tangent.Y;
+		Model[Index - 2].TZ = Tangent.Z;
+		Model[Index - 2].BX = Binormal.X;
+		Model[Index - 2].BY = Binormal.Y;
+		Model[Index - 2].BZ = Binormal.Z;
+
+		Model[Index - 3].NX = Normal.X;
+		Model[Index - 3].NY = Normal.Y;
+		Model[Index - 3].NZ = Normal.Z;
+		Model[Index - 3].TX = Tangent.X;
+		Model[Index - 3].TY = Tangent.Y;
+		Model[Index - 3].TZ = Tangent.Z;
+		Model[Index - 3].BX = Binormal.X;
+		Model[Index - 3].BY = Binormal.Y;
+		Model[Index - 3].BZ = Binormal.Z;
+	}
+}
+
+void ModelClass::CalculateTangentBinormal(TempVertexType InVertex1, TempVertexType InVertex2, TempVertexType InVertex3,
+	VectorType& OutTangent, VectorType& OutBinormal)
+{
+	float Vector1[3], Vector2[3];
+	float TUVector[2], TVVector[2];
+
+	// 현재 표면의 두 벡터를 계산합니다.
+	Vector1[0] = InVertex2.X - InVertex1.X;
+	Vector1[1] = InVertex2.Y - InVertex1.Y;
+	Vector1[2] = InVertex2.Z - InVertex1.Z;
+
+	Vector2[0] = InVertex3.X - InVertex1.X;
+	Vector2[1] = InVertex3.Y - InVertex1.Y;
+	Vector2[2] = InVertex3.Z - InVertex1.Z;
+
+	// tu 및 tv 텍스처 공간 벡터를 계산합니다.
+	TUVector[0] = InVertex2.TU - InVertex1.TU;
+	TVVector[0] = InVertex2.TV - InVertex1.TV;
+
+	TUVector[1] = InVertex3.TU - InVertex1.TU;
+	TVVector[1] = InVertex3.TV - InVertex1.TV;
+
+	// 탄젠트 / 바이 노멀 방정식의 분모를 계산합니다.
+	float den = 1.0f / (TUVector[0] * TVVector[1] - TUVector[1] * TVVector[0]);
+
+	// 교차 곱을 계산하고 계수로 곱하여 접선과 비 구식을 얻습니다.
+	OutTangent.X = (TVVector[1] * Vector1[0] - TVVector[0] * Vector2[0]) * den;
+	OutTangent.Y = (TVVector[1] * Vector1[1] - TVVector[0] * Vector2[1]) * den;
+	OutTangent.Z = (TVVector[1] * Vector1[2] - TVVector[0] * Vector2[2]) * den;
+
+	OutBinormal.X = (TUVector[0] * Vector2[0] - TUVector[1] * Vector1[0]) * den;
+	OutBinormal.Y = (TUVector[0] * Vector2[1] - TUVector[1] * Vector1[1]) * den;
+	OutBinormal.Z = (TUVector[0] * Vector2[2] - TUVector[1] * Vector1[2]) * den;
+
+	// 이 법선의 길이를 계산합니다.
+	float length = sqrt((OutTangent.X * OutTangent.X) + (OutTangent.Y * OutTangent.Y) + (OutTangent.Z * OutTangent.Z));
+
+	// 법선을 표준화 한 다음 저장합니다.
+	OutTangent.X = OutTangent.X / length;
+	OutTangent.Y = OutTangent.Y / length;
+	OutTangent.Z = OutTangent.Z / length;
+
+	// 이 법선의 길이를 계산합니다.
+	length = sqrt((OutBinormal.X * OutBinormal.X) + (OutBinormal.Y * OutBinormal.Y) + (OutBinormal.Z * OutBinormal.Z));
+
+	// 법선을 표준화 한 다음 저장합니다.
+	OutBinormal.X = OutBinormal.X / length;
+	OutBinormal.Y = OutBinormal.Y / length;
+	OutBinormal.Z = OutBinormal.Z / length;
+}
+
+
+void ModelClass::CalculateNormal(VectorType InTangent, VectorType InBinormal, VectorType& OutNormal)
+{
+	// 법선 벡터를 줄 수있는 접선과 binormal의 외적을 계산합니다.
+	OutNormal.X = (InTangent.Y * InBinormal.Z) - (InTangent.Z * InBinormal.Y);
+	OutNormal.Y = (InTangent.Z * InBinormal.X) - (InTangent.X * InBinormal.Z);
+	OutNormal.Z = (InTangent.X * InBinormal.Y) - (InTangent.Y * InBinormal.X);
+
+	// 법선의 길이를 계산합니다.
+	float length = sqrt((OutNormal.X * OutNormal.X) + (OutNormal.Y * OutNormal.Y) + (OutNormal.Z * OutNormal.Z));
+
+	// 법선을 표준화합니다.
+	OutNormal.X = OutNormal.X / length;
+	OutNormal.Y = OutNormal.Y / length;
+	OutNormal.Z = OutNormal.Z / length;
 }

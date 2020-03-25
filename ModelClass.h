@@ -6,17 +6,13 @@ class TextureClass;
 class ModelClass : public AlignedAllocationPolicy<16>
 {
 private:
-	//struct VertexType
-	//{
-	//	XMFLOAT3 Position;
-	//	XMFLOAT4 Color;
-	//};
-
 	struct VertexType
 	{
 		XMFLOAT3 Position;
-		XMFLOAT2 TexCoord;
+		XMFLOAT2 Texture;
 		XMFLOAT3 Normal;
+		XMFLOAT3 Tangent;
+		XMFLOAT3 Binormal;
 	};
 
 	struct ModelType
@@ -24,6 +20,20 @@ private:
 		float X, Y, Z;
 		float TU, TV;
 		float NX, NY, NZ;
+		float TX, TY, TZ;
+		float BX, BY, BZ;
+	};
+
+	struct TempVertexType
+	{
+		float X, Y, Z;
+		float TU, TV;
+		float NX, NY, NZ;
+	};
+
+	struct VectorType
+	{
+		float X, Y, Z;
 	};
 
 public:
@@ -49,6 +59,9 @@ private:
 	bool LoadModel(const char* InFilename);
 	void ReleaseModel();
 
+	void CalculateModelVectors();
+	void CalculateTangentBinormal(TempVertexType InVertex1, TempVertexType InVertex2, TempVertexType InVertex3, VectorType& OutTangent, VectorType& OutBinormal);
+	void CalculateNormal(VectorType InTangent, VectorType InBinormal, VectorType& OutNormal);
 private:
 	ID3D11Buffer* VertexBuffer = nullptr;
 	ID3D11Buffer* IndexBuffer = nullptr;

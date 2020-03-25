@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="AlignedAllocationPolicy.h" />
     <ClInclude Include="BitmapClass.h" />
+    <ClInclude Include="BumpMapShaderClass.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="ColorShaderClass.h" />
     <ClInclude Include="CPUClass.h" />
@@ -175,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BitmapClass.cpp" />
+    <ClCompile Include="BumpMapShaderClass.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="ColorShaderClass.cpp" />
     <ClCompile Include="CPUClass.cpp" />
@@ -206,6 +208,8 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Bumpmap.ps" />
+    <None Include="Shaders\Bumpmap.vs" />
     <None Include="Shaders\Color.ps" />
     <None Include="Shaders\Color.vs" />
     <None Include="Shaders\Light.ps" />

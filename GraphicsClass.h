@@ -16,6 +16,7 @@ class BitmapClass;
 class ModelListClass;
 class FrustumClass;
 class MultiTextureShaderClass;
+class BumpMapShaderClass;
 
 class GraphicsClass
 {
@@ -43,4 +44,5 @@ private:
 	ModelListClass* ModelList = nullptr;
 	FrustumClass* Frustum = nullptr;
 	MultiTextureShaderClass* MultiTextureShader = nullptr;
+	BumpMapShaderClass* BumpMapShader = nullptr;
 };
