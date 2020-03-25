@@ -6,6 +6,9 @@
 #include "GraphicsClass.h"
 #include "SystemClass.h"
 #include "PositionClass.h"
+#include "FPSClass.h"
+#include "CPUClass.h"
+#include "TimerClass.h"
 
 LRESULT CALLBACK SystemClassWndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam);
 
@@ -46,11 +49,29 @@ bool SystemClass::Initialize()
 	if (!Position)
 		return false;
 
+	FPS = new FPSClass();
+	if (!FPS)
+		return false;
+	FPS->Initialize();
+
+	CPU = new CPUClass();
+	if (!CPU)
+		return false;
+	CPU->Initialize();
+
+	Timer = new TimerClass();
+	if (!Timer)
+		return false;
+	Timer->Initialize();
+
 	return Graphics->Initialize(ScreenWidth, ScreenHeight, Hwnd);
 }
 
 void SystemClass::Shutdown()
 {
+	DX_DELETE(FPS);
+	DX_DELETE(CPU);
+	DX_DELETE(Timer);
 	DX_DELETE(Position);
 
 	if (Graphics)
@@ -73,6 +94,8 @@ void SystemClass::Run()
 	MSG msg;
 	ZeroMemory(&msg, sizeof(MSG));
 
+	char szPerf[128] = { 0, };
+
 	while (true)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -87,6 +110,16 @@ void SystemClass::Run()
 		{
 			if (!Frame())
 				break;
+
+			static float DeltaTime = 0;
+			DeltaTime += Timer->GetTime();
+			
+			if (DeltaTime > 1000.0f)
+			{
+				sprintf_s(szPerf, sizeof(szPerf) - 1, "FPS : %d, CPU : %d%%\n", FPS->GetFPS(), CPU->GetCPUPercentage());
+				OutputDebugStringA(szPerf);
+				DeltaTime = 0.0f;
+			}
 		}
 
 		if (Input->IsEscapePressed())
@@ -96,6 +129,10 @@ void SystemClass::Run()
 
 bool SystemClass::Frame()
 {
+	Timer->Frame();
+	FPS->Frame();
+	CPU->Frame();
+
 	if (!Input->Frame())
 		return false;
 

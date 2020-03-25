@@ -147,10 +147,12 @@
     <ClInclude Include="BitmapClass.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="ColorShaderClass.h" />
+    <ClInclude Include="CPUClass.h" />
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="DDSTextureLoader.h" />
     <ClInclude Include="DirectX11Tutorial.h" />
     <ClInclude Include="DxDefine.h" />
+    <ClInclude Include="FPSClass.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="FrustumClass.h" />
     <ClInclude Include="GraphicsClass.h" />
@@ -169,14 +171,17 @@
     <ClInclude Include="TextureArrayClass.h" />
     <ClInclude Include="TextureClass.h" />
     <ClInclude Include="TextureShaderClass.h" />
+    <ClInclude Include="TimerClass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BitmapClass.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="ColorShaderClass.cpp" />
+    <ClCompile Include="CPUClass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="DirectX11Tutorial.cpp" />
+    <ClCompile Include="FPSClass.cpp" />
     <ClCompile Include="FrustumClass.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
     <ClCompile Include="InputClass.cpp" />
@@ -191,6 +196,7 @@
     <ClCompile Include="TextureArrayClass.cpp" />
     <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="TextureShaderClass.cpp" />
+    <ClCompile Include="TimerClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DirectX11Tutorial.rc" />

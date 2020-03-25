@@ -4,6 +4,9 @@
 class InputClass;
 class GraphicsClass;
 class PositionClass;
+class FPSClass;
+class CPUClass;
+class TimerClass;
 
 class SystemClass
 {
@@ -31,6 +34,9 @@ private:
 	InputClass* Input = nullptr;
 	GraphicsClass* Graphics = nullptr;
 	PositionClass* Position = nullptr;
+	FPSClass* FPS = nullptr;
+	CPUClass* CPU = nullptr;
+	TimerClass* Timer = nullptr;
 };
 
 static SystemClass* ApplicationHandle = 0;
