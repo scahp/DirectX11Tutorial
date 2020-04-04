@@ -17,6 +17,8 @@ class ModelListClass;
 class FrustumClass;
 class MultiTextureShaderClass;
 class BumpMapShaderClass;
+class DebugWindowClass;
+class RenderTextureClass;
 
 class GraphicsClass
 {
@@ -31,6 +33,8 @@ public:
 
 private:
 	bool Render(float InRotation);
+	bool RenderToTexture(float InRotation);
+	bool RenderScene();
 
 private:
 	D3DClass* Direct3D = nullptr;
@@ -45,4 +49,6 @@ private:
 	FrustumClass* Frustum = nullptr;
 	MultiTextureShaderClass* MultiTextureShader = nullptr;
 	BumpMapShaderClass* BumpMapShader = nullptr;
+	DebugWindowClass* DebugWindow = nullptr;
+	RenderTextureClass* RenderTexture = nullptr;
 };

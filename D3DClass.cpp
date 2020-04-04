@@ -271,6 +271,30 @@ bool D3DClass::Initialize(int InWidth, int InHeight, bool InEnableVsync, HWND In
 	if (FAILED(Device->CreateDepthStencilState(&DepthDisabledStencilDesc, &DepthDisabledStencilState)))
 		return false;
 
+	// 블렌드 상태 구조체를 초기화 합니다.
+	D3D11_BLEND_DESC BlendStateDescription;
+	ZeroMemory(&BlendStateDescription, sizeof(D3D11_BLEND_DESC));
+
+	// 알파블렌드 값을 설정합니다.
+	BlendStateDescription.RenderTarget[0].BlendEnable = TRUE;
+	BlendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	BlendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	BlendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	BlendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	BlendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	BlendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	BlendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	if (FAILED(Device->CreateBlendState(&BlendStateDescription, &AlphaEnableBlendingState)))
+		return false;
+
+	// 알파 블렌드를 비활성화 설정합니다.
+	BlendStateDescription.RenderTarget[0].BlendEnable = FALSE;
+
+	// 블렌드 상태를 생성합니다.
+	if (FAILED(Device->CreateBlendState(&BlendStateDescription, &AlphaDisableBlendingState)))
+		return false;
+
 	return true;
 }
 
@@ -280,6 +304,8 @@ void D3DClass::Shutdown()
 	if (SwapChain)
 		SwapChain->SetFullscreenState(false, nullptr);
 
+	DX_RELEASE(AlphaEnableBlendingState);
+	DX_RELEASE(AlphaDisableBlendingState);
 	DX_RELEASE(DepthDisabledStencilState);
 	DX_RELEASE(RasterState);
 	DX_RELEASE(DepthStencilView);
@@ -323,3 +349,25 @@ void D3DClass::TurnZBufferOff()
 	DeviceContext->OMSetDepthStencilState(DepthDisabledStencilState, 1);
 }
 
+void D3DClass::TurnOnAlphaBlending()
+{
+	// 블렌드 인수를 설정합니다.
+	float BlendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	// 알파 블렌딩을 켭니다.
+	DeviceContext->OMSetBlendState(AlphaEnableBlendingState, BlendFactor, 0xffffffff);
+}
+
+void D3DClass::TurnOffAlphaBlending()
+{
+	// 블렌드 인수를 설정합니다.
+	float BlendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	// 알파 블렌딩을 끕니다.
+	DeviceContext->OMSetBlendState(AlphaDisableBlendingState, BlendFactor, 0xffffffff);
+}
+
+void D3DClass::SetBackBufferRenderTarget()
+{
+	DeviceContext->OMSetRenderTargets(1, &RenderTargetView, DepthStencilView);
+}

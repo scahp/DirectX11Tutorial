@@ -108,6 +108,12 @@
     <ClInclude Include="BumpMapShaderClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTextureClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugWindowClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX11Tutorial.cpp">
@@ -180,6 +186,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="BumpMapShaderClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTextureClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugWindowClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

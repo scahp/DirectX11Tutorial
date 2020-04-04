@@ -12,6 +12,8 @@
 #include "FrustumClass.h"
 #include "MultiTextureShaderClass.h"
 #include "BumpMapShaderClass.h"
+#include "RenderTextureClass.h"
+#include "DebugWindowClass.h"
 
 GraphicsClass::GraphicsClass()
 {
@@ -87,24 +89,24 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
   //      return false;
   //  }
 
-	//TextureShader = new TextureShaderClass();
-	//if (!TextureShader)
-	//{
-	//	DX_DELETE(Direct3D);
-	//	DX_DELETE(Camera);
-	//	DX_DELETE(Model);
-	//	return false;
-	//}
+	TextureShader = new TextureShaderClass();
+	if (!TextureShader)
+	{
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+		DX_DELETE(Model);
+		return false;
+	}
 
-	//if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
-	//{
-	//	DX_DELETE(Direct3D);
-	//	DX_DELETE(Camera);
-	//	DX_DELETE(Model);
-	//	DX_DELETE(TextureShader);
-	//	MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
-	//	return false;
-	//}
+	if (!TextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
+	{
+		DX_DELETE(Direct3D);
+		DX_DELETE(Camera);
+		DX_DELETE(Model);
+		DX_DELETE(TextureShader);
+		MessageBox(InHwnd, TEXT("Could not initialize the texture shader object"), TEXT("Error"), MB_OK);
+		return false;
+	}
 
  //   Bitmap = new BitmapClass();
  //   if (!Bitmap)
@@ -160,15 +162,36 @@ bool GraphicsClass::Initialize(int InScreenWidth, int InScreenHeight, HWND InHwn
         return false;
     }
 
-    MultiTextureShader = new MultiTextureShaderClass();
-    if (!MultiTextureShader)
-        return false;
+    //MultiTextureShader = new MultiTextureShaderClass();
+    //if (!MultiTextureShader)
+    //    return false;
 
-    if (!MultiTextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
-    {
-        MessageBox(InHwnd, TEXT("Could not initialize the multitexture shader object"), TEXT("Error"), MB_OK);
-        return false;
-    }
+    //if (!MultiTextureShader->Initialize(Direct3D->GetDevice(), InHwnd))
+    //{
+    //    MessageBox(InHwnd, TEXT("Could not initialize the multitexture shader object"), TEXT("Error"), MB_OK);
+    //    return false;
+    //}
+
+	// 렌더링 텍스처 객체를 생성한다.
+	RenderTexture = new RenderTextureClass();
+	if (!RenderTexture)
+		return false;
+
+	// 렌더링 텍스처 객체를 초기화한다.
+	if (!RenderTexture->Initialize(Direct3D->GetDevice(), InScreenWidth, InScreenHeight))
+		return false;
+
+	// 디버그 창 객체를 만듭니다.
+	DebugWindow = new DebugWindowClass();
+	if (!DebugWindow)
+		return false;
+
+	// 디버그 창 객체를 초기화 합니다.
+	if (!DebugWindow->Initialize(Direct3D->GetDevice(), InScreenWidth, InScreenHeight, 100, 100))
+	{
+		MessageBox(InHwnd, L"Could not initialize the debug window object.", L"Error", MB_OK);
+		return false;
+	}
 
     return true;
 }
@@ -194,13 +217,25 @@ void GraphicsClass::Shutdown()
 	//	Bitmap->Shutdown();
 	//	DX_DELETE(Bitmap);
 	//}
-	//
- //   if (TextureShader)
-	//{
- //       TextureShader->Shutdown();
-	//	DX_DELETE(TextureShader);
-	//}
- //  
+	
+    if (TextureShader)
+	{
+        TextureShader->Shutdown();
+		DX_DELETE(TextureShader);
+	}
+   
+	if (DebugWindow)
+	{
+		DebugWindow->Shutdown();
+		DX_DELETE(DebugWindow);
+	}
+
+	if (RenderTexture)
+	{
+		RenderTexture->Shutdown();
+		DX_DELETE(RenderTexture);
+	}
+
     DX_DELETE(Light);
 
     if (BumpMapShader)
@@ -243,17 +278,33 @@ bool GraphicsClass::Frame(float RotationY)
     return Render(RotationY);
 }
 
-bool GraphicsClass::Render(float InRotation)
+bool GraphicsClass::RenderToTexture(float InRotation)
 {
-    Direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
+	// 렌더링 대상을 렌더링에 맞게 설정합니다.
+	RenderTexture->SetRenderTarget(Direct3D->GetDeviceContext(), Direct3D->GetDepthStencilView());
 
-    Camera->Render();
+	// 렌더링을 텍스처에 지웁니다.
+	RenderTexture->ClearRenderTarget(Direct3D->GetDeviceContext(), Direct3D->GetDepthStencilView(), 0.0f, 0.0f, 1.0f, 1.0f);
 
-    XMMATRIX WorldMatrix, ViewMatrix, ProjectionMatrix, OrthoMatrix;
-    Direct3D->GetWorldMatrix(WorldMatrix);
-    Camera->GetViewMatrix(ViewMatrix);
-    Direct3D->GetProjectionMatrix(ProjectionMatrix);
-    Direct3D->GetOrthoMatrix(OrthoMatrix);
+	// 이제 장면을 렌더링하면 백 버퍼 대신 텍스처로 렌더링됩니다.
+	if (!RenderScene())
+		return false;
+
+	// 렌더링 대상을 원래의 백 버퍼로 다시 설정하고 렌더링에 대한 렌더링을 더 이상 다시 설정하지 않습니다.
+	Direct3D->SetBackBufferRenderTarget();
+
+	return true;
+}
+
+bool GraphicsClass::RenderScene()
+{
+	Camera->Render();
+
+	XMMATRIX WorldMatrix, ViewMatrix, ProjectionMatrix, OrthoMatrix;
+	Direct3D->GetWorldMatrix(WorldMatrix);
+	Camera->GetViewMatrix(ViewMatrix);
+	Direct3D->GetProjectionMatrix(ProjectionMatrix);
+	Direct3D->GetOrthoMatrix(OrthoMatrix);
 
 	static float Rotation = 0.0f;
 	Rotation += (float)XM_PI * 0.0025f;
@@ -262,14 +313,14 @@ bool GraphicsClass::Render(float InRotation)
 		Rotation -= 360.0f;
 	}
 	WorldMatrix = XMMatrixRotationY(Rotation);
-    
-    Model->Bind(Direct3D->GetDeviceContext());
 
-    BumpMapShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray(),
-        Light->GetDirection(), Light->GetDiffuseColor());
+	Model->Bind(Direct3D->GetDeviceContext());
 
-    //MultiTextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount()
-    //    , WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray());
+	return BumpMapShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount(), WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray(),
+		Light->GetDirection(), Light->GetDiffuseColor());
+
+	//MultiTextureShader->Render(Direct3D->GetDeviceContext(), Model->GetIndexCount()
+	//    , WorldMatrix, ViewMatrix, ProjectionMatrix, Model->GetTextureArray());
 
  //   Frustum->ConstructFrustum(SCREEN_DEPTH_FAR, ProjectionMatrix, ViewMatrix);
 
@@ -300,6 +351,48 @@ bool GraphicsClass::Render(float InRotation)
  //           ++RenderCount;
  //       }
  //   }
+}
+
+bool GraphicsClass::Render(float InRotation)
+{
+    if (!RenderToTexture(InRotation))
+        return false;
+
+    Direct3D->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
+
+    if (!RenderScene())
+        return false;
+
+	// 모든 2D 렌더링을 시작하려면 Z 버퍼를 끕니다.
+	Direct3D->TurnZBufferOff();
+
+	// 카메라 및 d3d 객체에서 월드, 뷰 및 투영 행렬을 가져옵니다
+	XMMATRIX worldMatrix, viewMatrix, orthoMatrix;
+
+	Camera->GetViewMatrix(viewMatrix);
+	Direct3D->GetWorldMatrix(worldMatrix);
+	Direct3D->GetOrthoMatrix(orthoMatrix);
+
+	// 디버그 윈도우 버텍스와 인덱스 버퍼를 그래픽 파이프 라인에 배치하여 그리기를 준비합니다.
+	if (!DebugWindow->Bind(Direct3D->GetDeviceContext(), 50, 50))
+	{
+		return false;
+	}
+
+	// 텍스처 셰이더를 사용해 디버그 윈도우를 렌더링한다.
+	if (!TextureShader->Render(Direct3D->GetDeviceContext(), DebugWindow->GetIndexCount(), worldMatrix, viewMatrix,
+		orthoMatrix, RenderTexture->GetShaderResourceView()))
+	{
+		return false;
+	}
+
+	// 모든 2D 렌더링이 완료되었으므로 Z 버퍼를 다시 켜십시오.
+	Direct3D->TurnZBufferOn();
+
+	// 버퍼의 내용을 화면에 출력합니다
+	Direct3D->EndScene();
+
+    //////////////////////////////////////////////////////////////////////////
 
     Direct3D->EndScene();
     return true;

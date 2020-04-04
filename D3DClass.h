@@ -26,6 +26,11 @@ public:
 	void TurnZBufferOn();
 	void TurnZBufferOff();
 
+	void TurnOnAlphaBlending();
+	void TurnOffAlphaBlending();
+	void SetBackBufferRenderTarget();
+
+	ID3D11DepthStencilView* GetDepthStencilView() { return DepthStencilView; }
 private:
 	bool EnableVsync = false;
 	int VideoCardMemory = 0;
@@ -42,4 +47,6 @@ private:
 	XMMATRIX WorldMatrix;
 	XMMATRIX OrthoMatrix;
 	ID3D11DepthStencilState* DepthDisabledStencilState = nullptr;
+	ID3D11BlendState* AlphaEnableBlendingState = nullptr;
+	ID3D11BlendState* AlphaDisableBlendingState = nullptr;
 };
